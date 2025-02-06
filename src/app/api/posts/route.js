@@ -1,9 +1,8 @@
 import { NextResponse } from "next/server";
-import formidable from "formidable";
 import connectDB from "@/lib/mongo";
 import Post from "@/models/Post";
 
-// Disable Next.js body parser to handle file uploads with formidable
+// Disable Next.js body parser to handle file uploads
 export const config = {
   api: {
     bodyParser: false,
@@ -12,40 +11,32 @@ export const config = {
 
 export async function POST(req) {
   try {
-    // Initialize formidable
-    const form = new formidable.IncomingForm();
-    form.uploadDir = "./public/uploads"; // Directory for file uploads
-    form.keepExtensions = true; // Keep file extension
+    const formData = await req.formData();
 
-    form.parse(req, async (err, fields, files) => {
-      if (err) {
-        return NextResponse.json(
-          { error: "Error in file upload" },
-          { status: 500 }
-        );
-      }
+    // Extract fields and files from the formData
+    const title = formData.get("title");
+    const content = formData.get("content");
+    const file = formData.get("image");
 
-      // Connect to MongoDB
-      await connectDB();
+    // Save the file to the uploads directory
+    const filePath = `./public/uploads/${file.name}`;
+    const fileBuffer = await file.arrayBuffer();
+    require("fs").writeFileSync(filePath, Buffer.from(fileBuffer));
 
-      // Get title, content from form fields
-      const { title, content } = fields;
+    // Connect to MongoDB
+    await connectDB();
 
-      // Get the image file path
-      const imageUrl = files.image ? files.image[0].filepath : null;
-
-      // Create and save the new post in MongoDB
-      const newPost = new Post({
-        title,
-        content,
-        imageUrl,
-      });
-
-      await newPost.save();
-
-      return NextResponse.json({ message: "Post created successfully!" });
+    // Create and save the new post in MongoDB
+    const newPost = new Post({
+      title,
+      content,
+      imageUrl: `/uploads/${file.name}`,
     });
+
+    await newPost.save();
+
+    return NextResponse.json({ message: "Post created successfully!" });
   } catch (error) {
-    return NextResponse.json({ error: "Error saving post" }, { status: 500 });
+    return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
