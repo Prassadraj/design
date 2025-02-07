@@ -1,90 +1,42 @@
 "use client";
-import { useState } from "react";
 
-export default function AdminPage() {
-  const [title, setTitle] = useState("");
-  const [content, setContent] = useState("");
-  const [image, setImage] = useState(null);
-  const [imageUrl, setImageUrl] = useState("");
+import { useRouter } from "next/navigation";
+import { FaPlus, FaEye } from "react-icons/fa";
 
-  const handleImageUpload = async (e) => {
-    const file = e.target.files[0];
-    setImage(file);
+export default function AdminDashboard() {
+  const router = useRouter();
 
-    // Convert to a preview URL for the image
-    const previewUrl = URL.createObjectURL(file);
-    setImageUrl(previewUrl); // Now this will work since setImageUrl is defined
+  const handleCreatePost = () => {
+    router.push("/admin/create-post");
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    // Create a FormData object to send the data including the file
-    const formData = new FormData();
-    formData.append("title", title);
-    formData.append("content", content);
-    formData.append("image", image); // Append the image file
-
-    try {
-      // Make a POST request to the API with FormData
-      const response = await fetch("/api/posts", {
-        method: "POST",
-        body: formData, // The FormData includes both text and the file
-      });
-
-      if (response.ok) {
-        alert("Post added successfully!");
-        setTitle("");
-        setContent("");
-        setImage(null);
-        setImageUrl(""); // Reset the image preview as well
-      } else {
-        alert("Error adding post");
-      }
-    } catch (error) {
-      alert("Error: " + error.message);
-    }
+  const handleViewPosts = () => {
+    router.push("/admin/view-posts");
   };
 
   return (
-    <div className="max-w-xl mx-auto mt-10 p-5 border rounded-lg shadow-lg">
-      <h2 className="text-xl font-bold mb-4">Add New Post</h2>
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <input
-          type="text"
-          placeholder="Title"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          className="w-full p-2 border rounded text-black"
-          required
-        />
-        <textarea
-          placeholder="Content"
-          value={content}
-          onChange={(e) => setContent(e.target.value)}
-          className="w-full p-2 border rounded text-black"
-          required
-        />
-        <input
-          type="file"
-          accept="image/*"
-          onChange={handleImageUpload}
-          className="w-full p-2 border rounded text-black"
-        />
-        {imageUrl && (
-          <img
-            src={imageUrl}
-            alt="Preview"
-            className="w-full h-40 object-cover mt-2 rounded"
-          />
-        )}
-        <button
-          type="submit"
-          className="w-full bg-blue-500 text-white p-2 rounded"
-        >
-          Add Post
-        </button>
-      </form>
+    <div className="grid grid-rows-[20px_1fr] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
+      <header className="row-start-1">
+        <h1 className="text-4xl font-bold">Admin Dashboard</h1>
+      </header>
+      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
+        <div className="flex flex-col gap-4 items-center sm:items-start">
+          <button
+            className="flex items-center bg-blue-500 text-white p-2 rounded"
+            onClick={handleCreatePost}
+          >
+            <FaPlus className="mr-2" />
+            Create Post
+          </button>
+          <button
+            className="flex items-center bg-green-500 text-white p-2 rounded"
+            onClick={handleViewPosts}
+          >
+            <FaEye className="mr-2" />
+            View Posts
+          </button>
+        </div>
+      </main>
     </div>
   );
 }
