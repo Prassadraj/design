@@ -22,14 +22,14 @@ export default function AdminDashboard() {
       <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
         <div className="flex flex-col gap-4 items-center sm:items-start">
           <button
-            className="flex items-center bg-blue-500 text-white p-2 rounded"
+            className="flex items-center bg-white/20 text-white p-4 rounded-lg text-xl backdrop-blur-lg shadow-lg"
             onClick={handleCreatePost}
           >
             <FaPlus className="mr-2" />
             Create Post
           </button>
           <button
-            className="flex items-center bg-green-500 text-white p-2 rounded"
+            className="flex items-center bg-white/20 text-white p-4 rounded-lg text-xl backdrop-blur-lg shadow-lg"
             onClick={handleViewPosts}
           >
             <FaEye className="mr-2" />
