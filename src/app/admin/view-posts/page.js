@@ -1,5 +1,6 @@
 "use client";
 
+import axios from "axios";
 import { useEffect, useState } from "react";
 import { FaTimes, FaTrash, FaEdit } from "react-icons/fa";
 
@@ -10,9 +11,10 @@ export default function ViewPosts() {
 
   useEffect(() => {
     // Fetch all posts from the backend API
-    fetch("/api/posts")
-      .then((res) => res.json())
-      .then((data) => setPosts(data));
+    axios
+      .get("/api/posts")
+      .then((res) => setPosts(data))
+      .catch((err) => console.log(err));
   }, []);
 
   const handleImageClick = (imageUrl) => {
@@ -27,16 +29,11 @@ export default function ViewPosts() {
 
   const handleDeletePost = async (postId) => {
     try {
-      const response = await fetch(`/api/posts`, {
-        method: "DELETE",
+      const response = await axios.delete(`/api/posts`, {
+        data: { id: postId },
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: postId }),
       });
-      if (response.ok) {
-        setPosts(posts.filter(post => post._id !== postId));
-      } else {
-        console.error("Error deleting post");
-      }
+      setPosts(posts.filter((post) => post._id !== postId));
     } catch (error) {
       console.error("Error:", error);
     }
