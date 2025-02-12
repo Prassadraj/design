@@ -1,12 +1,18 @@
 "use client";
 import { useState, useEffect } from "react";
-import { toast, ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import { FaTrash, FaEdit } from "react-icons/fa";
-
+import axios from "axios";
 export default function AdminPage() {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
+  const [form, setForm] = useState({
+    title: "",
+    content: "",
+    image: "",
+    id: "",
+  });
   const [image, setImage] = useState(null);
   const [imageUrl, setImageUrl] = useState("");
   const [posts, setPosts] = useState([]);
@@ -32,42 +38,37 @@ export default function AdminPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const formData = new FormData();
-    formData.append("title", title);
-    formData.append("content", content);
-    formData.append("image", image);
-
     if (editingPostId) {
-      formData.append("id", editingPostId); // Add the ID to the form data if editing
+      setForm((prev) => ({
+        ...prev,
+        id: editingPostId,
+      }));
     }
 
     try {
       let response;
       console.log(editingPostId);
       if (editingPostId) {
-        response = await fetch(`/api/posts/`, {
-          method: "PATCH",
-          body: formData,
-        });
+        response = await axios.patch(`/api/posts`, form);
       } else {
-        response = await fetch("/api/posts/", {
-          method: "POST",
-          body: formData,
-        });
+        response = await axios.post(`/api/posts`, form);
       }
 
       if (response.ok) {
-        toast.success(editingPostId ? "Post updated successfully!" : "Post added successfully!");
-        setTitle("");
-        setContent("");
-        setImage(null);
+        toast.success(
+          editingPostId
+            ? "Post updated successfully!"
+            : "Post added successfully!"
+        );
+        setForm({ title: "", content: "", file: null });
         setImageUrl("");
         setEditingPostId(null);
         // Fetch updated posts
-        const updatedPosts = await fetch("/api/posts").then((res) => res.json());
+        const { data: updatedPosts } = await axios.get("/api/posts");
+
         setPosts(updatedPosts);
       } else {
-        toast.error("Error adding/updating post: " + await response.text());
+        toast.error("Error adding/updating post: " + (await response.text()));
       }
     } catch (error) {
       toast.error("Error: " + error.message);
@@ -76,16 +77,9 @@ export default function AdminPage() {
 
   const handleDeletePost = async (postId) => {
     try {
-      const response = await fetch(`/api/posts/${postId}`, {
-        method: "DELETE",
-      });
-
-      if (response.ok) {
-        toast.success("Post deleted successfully!");
-        setPosts(posts.filter((post) => post._id !== postId));
-      } else {
-        toast.error("Error deleting post");
-      }
+      const response = await axios.delete(`/api/posts/${postId}`);
+      toast.success("Post deleted successfully!");
+      setPosts(posts.filter((post) => post._id !== postId));
     } catch (error) {
       toast.error("Error: " + error.message);
     }
@@ -93,8 +87,12 @@ export default function AdminPage() {
 
   const handleEditPost = (post) => {
     setEditingPostId(post._id);
-    setTitle(post.title);
-    setContent(post.content);
+    setForm((prev) => ({
+      title: post.title,
+      content: post.content,
+      ...prev,
+    }));
+
     setImageUrl(post.imageUrl);
   };
 
@@ -110,7 +108,12 @@ export default function AdminPage() {
             type="text"
             placeholder="Title"
             value={title}
-            onChange={(e) => setTitle(e.target.value)}
+            onChange={(e) =>
+              setForm((prev) => ({
+                ...prev,
+                title: e.target.value,
+              }))
+            }
             className="w-full p-2 border rounded text-black"
             required
           />
@@ -122,11 +125,7 @@ export default function AdminPage() {
             required
           />
           {editingPostId && (
-            <input
-              type="hidden"
-              value={editingPostId}
-              className="hidden"
-            />
+            <input type="hidden" value={editingPostId} className="hidden" />
           )}
           <div className="flex justify-center">
             <div className="flex flex-col items-center">
