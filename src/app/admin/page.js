@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect,useRef } from "react";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { FaTrash, FaEdit, FaPlus, FaArrowLeft } from "react-icons/fa";
@@ -16,6 +16,9 @@ export default function AdminPage() {
   const [editingPostId, setEditingPostId] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState(""); // Add search term state
+  const [isFullScreen, setIsFullScreen] = useState(false);
+  const imageRef = useRef(null);
+
 
   useEffect(() => {
     const fetchPosts = async () => {
@@ -195,6 +198,10 @@ export default function AdminPage() {
 
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
         <form onSubmit={handleSubmit} className="space-y-4">
+          <h1 className="text-3xl font-semibold text-center">
+            {" "}
+            {editingPostId ? "Update Post" : "Add Post"}
+          </h1>
           <input
             type="text"
             placeholder="Title"
@@ -213,20 +220,33 @@ export default function AdminPage() {
           {editingPostId && (
             <input type="hidden" value={editingPostId} className="hidden" />
           )}
-          <input
-            type="file"
-            accept="image/*"
-            onChange={handleImageUpload}
-            className="p-2 border rounded text-black"
-          />
+          <div className="flex flex-col items-center justify-center">
+            {" "}
+            {/* Center content vertically and horizontally */}
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleImageUpload}
+              className="hidden" // Hide the default input
+              id="fileInput" // Add an ID to the input
+            />
+            <label
+              htmlFor="fileInput"
+              className="cursor-pointer bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+            >
+              {" "}
+              {/* Style the label */}
+              Choose File
+            </label>
+          </div>
           <div className="flex justify-center">
             <div className="flex flex-col items-center">
-              {imageUrl && (
-                <img
-                  src={imageUrl}
-                  alt="Preview"
-                  className="w-32 h-32 object-cover mt-2 rounded"
-                />
+            {imageUrl && (
+                  <img
+                    src={imageUrl}
+                    alt={title}
+                    className="w-32 h-32 object-cover mt-2 rounded cursor-pointer"
+                  />
               )}
             </div>
           </div>
@@ -234,7 +254,7 @@ export default function AdminPage() {
             type="submit"
             className="w-full bg-[#ff6200] text-white p-2 rounded"
           >
-            {editingPostId ? "Update Post" : "Add Post"}
+            Submit
           </button>
         </form>
       </Modal>

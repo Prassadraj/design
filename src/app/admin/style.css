@@ -8,3 +8,15 @@ li:hover {
 li {
   overflow: hidden; /* Prevents content from spilling out */
 }
+
+.file-input-container {
+  display: flex;
+  flex-direction: column; /* Arrange items vertically */
+  align-items: center; /* Center horizontally */
+  justify-content: center; /* Center vertically */
+}
+
+.file-name {
+  text-align: center; /* Center the text */
+  margin-top: 10px; /* Add some space above the file name */
+}
