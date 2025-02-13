@@ -27,9 +27,9 @@ export default function AdminPage() {
     try {
       let response;
       if (editingPostId) {
-        response = await axios.patch(`/api/posts?postId=${editingPostId}`, form); // Use editingPostId
+        response = await axios.patch(`/api/post?postId=${editingPostId}`, form); // Use editingPostId
       } else {
-        response = await axios.post(`/api/posts`, form);
+        response = await axios.post(`/api/post`, form);
       }
 
       if (response.status === 200) { // Check for successful response status (200 OK)
@@ -44,7 +44,7 @@ export default function AdminPage() {
         setTitle(""); // Clear the title input field
         setContent(""); // Clear the content input field
         // Fetch updated posts (better to use async/await here too)
-        const updatedPostsResponse = await axios.get("/api/posts");
+        const updatedPostsResponse = await axios.get("/api/post");
         setPosts(updatedPostsResponse.data);
       } else {
         const errorData = await response.data; // Try to get error details from the server

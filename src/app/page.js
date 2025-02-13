@@ -10,7 +10,7 @@ export default function Home() {
 
   useEffect(() => {
     // Fetch posts from your API or data source
-    fetch("/api/posts")
+    fetch("/api/post")
       .then((res) => res.json())
       .then((data) => setPosts(data))
       .catch((error) => console.error("Error fetching posts:", error));

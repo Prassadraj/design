@@ -12,7 +12,7 @@ export default function ViewPosts() {
   useEffect(() => {
     // Fetch all posts from the backend API
     axios
-      .get("/api/posts")
+      .get("/api/post")
       .then((res) => setPosts(data))
       .catch((err) => console.log(err));
   }, []);
@@ -29,7 +29,7 @@ export default function ViewPosts() {
 
   const handleDeletePost = async (postId) => {
     try {
-      const response = await axios.delete(`/api/posts`, {
+      const response = await axios.delete(`/api/post`, {
         data: { id: postId },
         headers: { "Content-Type": "application/json" },
       });
