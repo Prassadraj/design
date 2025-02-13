@@ -5,6 +5,7 @@ import "react-toastify/dist/ReactToastify.css";
 import { FaTrash, FaEdit, FaPlus, FaArrowLeft } from "react-icons/fa";
 import "./style.css";
 import Modal from "./modal";
+import axios from "axios"; // Import axios
 
 export default function AdminPage() {
   const [title, settitle] = useState("");
@@ -17,12 +18,18 @@ export default function AdminPage() {
   const [searchTerm, setSearchTerm] = useState(""); // Add search term state
 
   useEffect(() => {
-    // Fetch posts from your API or data source
-    fetch("/api/post")
-      .then((res) => res.json())
-      .then((data) => setPosts(data))
-      .catch((error) => console.error("Error fetching posts:", error));
+    const fetchPosts = async () => {
+      try {
+        const response = await axios.get("/api/post");
+        setPosts(response.data);
+      } catch (error) {
+        console.error("Error fetching posts:", error);
+      }
+    };
+
+    fetchPosts();
   }, []);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -30,26 +37,24 @@ export default function AdminPage() {
     formData.append("title", title);
     formData.append("content", content);
     if (image) {
-      formData.append("image", image); // Append the image file
-    } else if (imageUrl){
-        formData.append("imageUrl", imageUrl)
+      formData.append("image", image);
+    } else if (imageUrl) {
+      formData.append("imageUrl", imageUrl);
     }
 
     try {
       let response;
       if (editingPostId) {
-        response = await fetch(`/api/post/?postId=${editingPostId}`, {
-          method: "PATCH",
-          body: formData, // Use FormData for the body
-        });
+        response = await axios.patch(
+          `/api/post/?postId=${editingPostId}`,
+          formData
+        );
       } else {
-        response = await fetch("/api/post", {
-          method: "POST",
-          body: formData, // Use FormData for the body
-        });
+        response = await axios.post("/api/post", formData);
       }
 
-      if (response.ok) {
+      if (response.status === 200) {
+        // Check status code for success
         toast.success(
           editingPostId
             ? "Post updated successfully!"
@@ -57,30 +62,29 @@ export default function AdminPage() {
         );
         settitle("");
         setcontent("");
-        setImage(null); // Clear the image state
+        setImage(null);
         setImageUrl("");
         setEditingPostId(null);
         setIsModalOpen(false);
-        const updatedPosts = await fetch("/api/post").then((res) =>
-          res.json()
-        );
-        setPosts(updatedPosts);
+
+        const updatedPosts = await axios.get("/api/post");
+        setPosts(updatedPosts.data);
       } else {
-        const errorText = await response.text();
+        const errorText = response.data; //axios automatically parses the error
+        console.error("Error adding/updating Post:", errorText);
         toast.error("Error adding/updating Post: " + errorText);
       }
     } catch (error) {
-      toast.error("Error: " + error.message);
+      console.error("Axios Error:", error); // Log the full Axios error
+      toast.error("Error: " + error.message); // Display a user-friendly message
     }
   };
 
   const handleDeletePost = async (PostId) => {
     try {
-      const response = await fetch(`/api/post/?postId=${PostId}`, {
-        method: "DELETE",
-      });
+      const response = await axios.delete(`/api/post/?postId=${PostId}`);
 
-      if (response.ok) {
+      if (response.status === 200) {
         toast.success("Post deleted successfully!");
         setPosts(Posts.filter((Post) => Post._id !== PostId));
       } else {
@@ -159,35 +163,35 @@ export default function AdminPage() {
       </div>
 
       <div className="mt-10">
-  <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4">
-    {filteredPosts.map((Post) => (
-      <li
-        key={Post._id}
-        className="border border-orange-500 p-4 rounded relative transform transition-transform duration-300 ease-in-out hover:scale-105 hover:z-10 overflow-hidden"
-      >
-        <div className="flex items-center justify-center space-x-4 absolute top-0 right-2 bottom-0">
-          <FaEdit
-            onClick={() => handleEditPost(Post)}
-            className="cursor-pointer text-blue-500 text-2xl"
-          />
-          <FaTrash
-            onClick={() => handleDeletePost(Post._id)}
-            className="cursor-pointer text-blue-500 text-2xl"
-          />
-        </div>
-        <h2 className="text-xl font-bold">{Post.title}</h2>
-        <p>{Post.content}</p>
-        {Post.imageUrl && (
-          <img
-            src={Post.imageUrl}
-            alt={Post.title}
-            className="w-32 h-32 object-cover mt-2 rounded"
-          />
-        )}
-      </li>
-    ))}
-  </ul>
-</div>
+        <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4">
+          {filteredPosts.map((Post) => (
+            <li
+              key={Post._id}
+              className="border border-orange-500 p-4 rounded relative transform transition-transform duration-300 ease-in-out hover:scale-105 hover:z-10 overflow-hidden"
+            >
+              <div className="flex items-center justify-center space-x-4 absolute top-0 right-2 bottom-0">
+                <FaEdit
+                  onClick={() => handleEditPost(Post)}
+                  className="cursor-pointer text-blue-500 text-2xl"
+                />
+                <FaTrash
+                  onClick={() => handleDeletePost(Post._id)}
+                  className="cursor-pointer text-blue-500 text-2xl"
+                />
+              </div>
+              <h2 className="text-xl font-bold">{Post.title}</h2>
+              <p>{Post.content}</p>
+              {Post.imageUrl && (
+                <img
+                  src={Post.imageUrl}
+                  alt={Post.title}
+                  className="w-32 h-32 object-cover mt-2 rounded"
+                />
+              )}
+            </li>
+          ))}
+        </ul>
+      </div>
 
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -209,12 +213,12 @@ export default function AdminPage() {
           {editingPostId && (
             <input type="hidden" value={editingPostId} className="hidden" />
           )}
-           <input
-                type="file"
-                accept="image/*"
-                onChange={handleImageUpload}
-                className="p-2 border rounded text-black"
-              />
+          <input
+            type="file"
+            accept="image/*"
+            onChange={handleImageUpload}
+            className="p-2 border rounded text-black"
+          />
           <div className="flex justify-center">
             <div className="flex flex-col items-center">
               {imageUrl && (
