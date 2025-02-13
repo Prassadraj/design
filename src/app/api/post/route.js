@@ -82,7 +82,19 @@ export async function DELETE(req) {
 
     await Post.findByIdAndDelete(id);
     const filePath = path.join(process.cwd(), "public", post.imageUrl);
-    await fsPromises.unlink(filePath);
+
+    try {
+      await fsPromises.unlink(filePath);
+      console.log(`File ${filePath} deleted successfully`);
+    } catch (error) {
+      if (error.code === 'ENOENT') { // File not found
+        console.log(`File ${filePath} not found, skipping deletion.`);
+      } else {
+        console.error(`Error deleting file ${filePath}:`, error);
+        // Handle other errors appropriately (e.g., re-throw if critical)
+        // throw error;  // Example: re-throw if you want to stop execution
+      }
+    }
     return NextResponse.json({
       message: "Post and file deleted successfully!",
     });
