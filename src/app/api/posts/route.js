@@ -26,12 +26,13 @@ export async function GET() {
 // POST Method to create a new post
 export async function POST(req) {
   try {
-    const body = await req.json();
+    const formData = await req.formData();
     const newData = {
-      title: body.title,
-      content: body.content,
-      file: body.image,
+      title: formData.get('title'),
+      content: formData.get('content'),
+      file: formData.get('image'),
     };
+    console.log("newData:", newData);
     if (!newData.title || !newData.content || !newData.file) {
       return NextResponse.json(
         { error: "Missing required fields" },
@@ -54,6 +55,8 @@ export async function POST(req) {
       content: newData.content,
       imageUrl: `/uploads/${newData.file.name}`,
     });
+
+    console.log("newPost:", newPost);
 
     await newPost.save();
 
