@@ -4,28 +4,59 @@ import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { FaTrash, FaEdit } from "react-icons/fa";
 import axios from "axios";
+
 export default function AdminPage() {
-  const [title, setTitle] = useState("");
-  const [content, setContent] = useState("");
-  const [form, setForm] = useState({
-    title: "",
-    content: "",
-    image: "",
-    id: "",
-  });
-  const [image, setImage] = useState(null);
-  const [imageUrl, setImageUrl] = useState("");
+  const [form, setForm] = useState({ title: "", content: "", image: null, id: "" });
+  const [title, setTitle] = useState(""); // Define the title state
+  const [content, setContent] = useState(""); // Define the content state
   const [posts, setPosts] = useState([]);
+  const [imageUrl, setImageUrl] = useState("");
   const [editingPostId, setEditingPostId] = useState(null);
 
-  useEffect(() => {
-    // Fetch posts from your API or data source
-    fetch("/api/posts")
-      .then((res) => res.json())
-      .then((data) => setPosts(data))
-      .catch((error) => console.error("Error fetching posts:", error));
-  }, []);
+  const handleTitleChange = (e) => {
+    setForm((prev) => ({
+      ...prev,
+      title: e.target.value, // Correctly update the title in the form
+    }));
+    setTitle(e.target.value); // Keep the separate title state for the input field
+  };
 
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    try {
+      let response;
+      if (editingPostId) {
+        response = await axios.patch(`/api/posts?postId=${editingPostId}`, form); // Use editingPostId
+      } else {
+        response = await axios.post(`/api/posts`, form);
+      }
+
+      if (response.status === 200) { // Check for successful response status (200 OK)
+        toast.success(
+          editingPostId
+            ? "Post updated successfully!"
+            : "Post added successfully!"
+        );
+        setForm({ title: "", content: "", image: null, id: "" }); // Reset id as well
+        setImageUrl("");
+        setEditingPostId(null);
+        setTitle(""); // Clear the title input field
+        setContent(""); // Clear the content input field
+        // Fetch updated posts (better to use async/await here too)
+        const updatedPostsResponse = await axios.get("/api/posts");
+        setPosts(updatedPostsResponse.data);
+      } else {
+        const errorData = await response.data; // Try to get error details from the server
+        toast.error(`Error adding/updating post: ${response.status} - ${errorData.message || response.statusText}`);
+      }
+    } catch (error) {
+      console.error("Error details:", error); // Log the full error for debugging
+      toast.error("Error: " + error.message);
+    }
+  };
+
+  
   const handleImageUpload = async (e) => {
     const file = e.target.files[0];
     setImage(file);
@@ -35,64 +66,17 @@ export default function AdminPage() {
     setImageUrl(previewUrl);
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    if (editingPostId) {
-      setForm((prev) => ({
-        ...prev,
-        id: editingPostId,
-      }));
-    }
-
-    try {
-      let response;
-      console.log(editingPostId);
-      if (editingPostId) {
-        response = await axios.patch(`/api/posts`, form);
-      } else {
-        response = await axios.post(`/api/posts`, form);
-      }
-
-      if (response.ok) {
-        toast.success(
-          editingPostId
-            ? "Post updated successfully!"
-            : "Post added successfully!"
-        );
-        setForm({ title: "", content: "", file: null });
-        setImageUrl("");
-        setEditingPostId(null);
-        // Fetch updated posts
-        const { data: updatedPosts } = await axios.get("/api/posts");
-
-        setPosts(updatedPosts);
-      } else {
-        toast.error("Error adding/updating post: " + (await response.text()));
-      }
-    } catch (error) {
-      toast.error("Error: " + error.message);
-    }
-  };
-
-  const handleDeletePost = async (postId) => {
-    try {
-      const response = await axios.delete(`/api/posts/${postId}`);
-      toast.success("Post deleted successfully!");
-      setPosts(posts.filter((post) => post._id !== postId));
-    } catch (error) {
-      toast.error("Error: " + error.message);
-    }
-  };
 
   const handleEditPost = (post) => {
     setEditingPostId(post._id);
-    setForm((prev) => ({
+    setForm({
       title: post.title,
       content: post.content,
-      ...prev,
-    }));
-
+      image: null, // Reset image when editing
+      id: post._id,
+    });
+    setTitle(post.title); // Update title state for the input field
+    setContent(post.content); // Update content state
     setImageUrl(post.imageUrl);
   };
 
@@ -108,12 +92,7 @@ export default function AdminPage() {
             type="text"
             placeholder="Title"
             value={title}
-            onChange={(e) =>
-              setForm((prev) => ({
-                ...prev,
-                title: e.target.value,
-              }))
-            }
+            onChange={handleTitleChange} // Call handleTitleChange on title change
             className="w-full p-2 border rounded text-black"
             required
           />

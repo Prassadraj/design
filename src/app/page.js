@@ -29,7 +29,7 @@ export default function Home() {
   return (
     <div className="min-h-screen p-8">
       <header className="mb-8 text-center">
-        <h1 className="text-3xl font-bold">Home Page</h1>
+        <h1 className="text-4xl font-bold">Home Page</h1>
       </header>
       <main>
         <ul className="flex flex-col gap-4">

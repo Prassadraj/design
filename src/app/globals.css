@@ -2,20 +2,22 @@
 @tailwind components;
 @tailwind utilities;
 
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #f09d51; /* A warm, modern orange color */
+  --foreground: #282828; /* A dark grey for good contrast */
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: #f1f1f1; /* A bolder orange for dark mode */
+    --foreground: #ff6200; /* A lighter grey for readability */
   }
 }
 
 body {
   color: var(--foreground);
   background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: 'Roboto', Arial, Helvetica, sans-serif; /* Updated font */
 }

@@ -23,7 +23,6 @@ export async function GET() {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
-
 // POST Method to create a new post
 export async function POST(req) {
   try {
@@ -68,7 +67,8 @@ export async function POST(req) {
 // DELETE Method to delete a post and its file//////
 export async function DELETE(req) {
   try {
-    const { id } = await req.json();
+    const url = new URL(req.url);
+    const id = url.searchParams.get('postId');  // assuming productId is passed in query params
 
     await connectDB();
     const post = await Post.findById(id);
@@ -93,7 +93,8 @@ export async function DELETE(req) {
 export async function PATCH(req) {
   try {
     const body = await req.json();
-    const { id } = await req.json();
+    const url = new URL(req.url);
+    const id = url.searchParams.get('postId');  
     const newData = {
       id: body.id,
       title: body.title,

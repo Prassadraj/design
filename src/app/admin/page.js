@@ -1,42 +1,238 @@
 "use client";
+import { useState, useEffect } from "react";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { FaTrash, FaEdit, FaPlus, FaArrowLeft } from "react-icons/fa";
+import "./style.css";
+import Modal from "./modal";
 
-import { useRouter } from "next/navigation";
-import { FaPlus, FaEye } from "react-icons/fa";
+export default function AdminPage() {
+  const [title, settitle] = useState("");
+  const [content, setcontent] = useState("");
+  const [imageUrl, setImageUrl] = useState("");
+  const [Posts, setPosts] = useState([]);
+  const [editingPostId, setEditingPostId] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState(""); // Add search term state
 
-export default function AdminDashboard() {
-  const router = useRouter();
+  useEffect(() => {
+    // Fetch posts from your API or data source
+    fetch("/api/posts")
+      .then((res) => res.json())
+      .then((data) => setPosts(data))
+      .catch((error) => console.error("Error fetching posts:", error));
+  }, []);
 
-  const handleCreatePost = () => {
-    router.push("/admin/create-post");
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    const data = {
+      title: title,
+      content: content,
+      imageUrl: imageUrl,
+    };
+    
+
+    try {
+      let response;
+      if (editingPostId) {
+        response = await fetch(`/api/Posts/?postId=${editingPostId}`, {
+          method: "PATCH",
+          body: JSON.stringify(data),
+        });
+      } else {
+        response = await fetch("/api/Posts", {
+          method: "POST",
+          body: JSON.stringify(data),
+        });
+      }
+
+      if (response.ok) {
+        toast.success(
+          editingPostId
+            ? "Post updated successfully!"
+            : "Post added successfully!"
+        );
+        settitle("");
+        setcontent("");
+        setImageUrl("");
+        setEditingPostId(null);
+        setIsModalOpen(false);
+        // Fetch updated Posts
+        const updatedPosts = await fetch("/api/Posts").then((res) =>
+          res.json()
+        );
+        setPosts(updatedPosts);
+      } else {
+        const errorText = await response.text();
+        console.error("Error adding/updating Post:", errorText);
+        toast.error("Error adding/updating Post: " + errorText);
+      }
+    } catch (error) {
+      toast.error("Error: " + error.message);
+    }
   };
 
-  const handleViewPosts = () => {
-    router.push("/admin/view-posts");
+  const handleDeletePost = async (PostId) => {
+    try {
+      const response = await fetch(`/api/posts/?PostId=${PostId}`, {
+        method: "DELETE",
+      });
+
+      if (response.ok) {
+        toast.success("Post deleted successfully!");
+        setPosts(Posts.filter((Post) => Post._id !== PostId));
+      } else {
+        toast.error("Error deleting Post");
+      }
+    } catch (error) {
+      toast.error("Error: " + error.message);
+    }
   };
+
+  const handleEditPost = (Post) => {
+    setEditingPostId(Post._id);
+    settitle(Post.title);
+    setcontent(Post.content);
+    setImageUrl(Post.imageUrl);
+    setIsModalOpen(true);
+  };
+
+  const handleAddPost = () => {
+    setEditingPostId(null);
+    settitle("");
+    setcontent("");
+    setImageUrl("");
+    setIsModalOpen(true);
+  };
+  const handleBack = () => {
+    window.history.back();
+  };
+
+  const handleImageUpload = async (e) => {
+    const file = e.target.files[0];
+    setImage(file);
+
+    // Convert to a preview URL for the image
+    const imageUrl = URL.createObjectURL(file);
+    setImageUrl(imageUrl);
+  };
+
+  const filteredPosts = Posts.filter(
+    (Post) =>
+      Post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      Post.content.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
-    <div className="grid grid-rows-[20px_1fr] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <header className="row-start-1">
-        <h1 className="text-4xl font-bold">Admin Dashboard</h1>
-      </header>
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <div className="flex flex-col gap-4 items-center sm:items-start">
+    <div className="min-h-screen p-8">
+      <ToastContainer />
+      <header className="mb-8 flex items-center justify-between">
+        <div className="flex-1">
+          <h1 className="text-4xl font-semibold">Manage Posts</h1>
+        </div>
+        <div className="flex">
           <button
-            className="flex items-center bg-white/20 text-white p-4 rounded-lg text-xl backdrop-blur-lg shadow-lg"
-            onClick={handleCreatePost}
+            className="bg-gradient-to-r from-blue-500 to-indigo-500 text-white p-2 rounded-md shadow-lg transform hover:scale-105 transition-all duration-300 ml-4 flex items-center"
+            onClick={handleAddPost}
           >
-            <FaPlus className="mr-2" />
-            Create Post
+            <FaPlus className="mr-2" /> Add New Post
           </button>
           <button
-            className="flex items-center bg-white/20 text-white p-4 rounded-lg text-xl backdrop-blur-lg shadow-lg"
-            onClick={handleViewPosts}
+            className="bg-gradient-to-r from-blue-500 to-indigo-500 text-white p-2 rounded-md shadow-lg transform hover:scale-105 transition-all duration-300 ml-4 flex items-center"
+            onClick={handleBack}
           >
-            <FaEye className="mr-2" />
-            View Posts
+            <FaArrowLeft className="mr-2" /> Back
           </button>
         </div>
-      </main>
+      </header>
+
+      <div className="flex justify-center mb-8">
+        <input
+          type="text"
+          placeholder="Search Posts..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="w-full p-2 border rounded text-black transform transition-transform duration-300 hover:scale-75 hover:z-10 focus:outline-none focus:border-blue-500"
+        />
+      </div>
+
+      <div className="mt-10">
+  <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4">
+    {filteredPosts.map((Post) => (
+      <li
+        key={Post._id}
+        className="border border-orange-500 p-4 rounded relative transform transition-transform duration-300 ease-in-out hover:scale-105 hover:z-10 overflow-hidden"
+      >
+        <div className="flex items-center justify-center space-x-4 absolute top-0 right-2 bottom-0">
+          <FaEdit
+            onClick={() => handleEditPost(Post)}
+            className="cursor-pointer text-blue-500 text-2xl"
+          />
+          <FaTrash
+            onClick={() => handleDeletePost(Post._id)}
+            className="cursor-pointer text-blue-500 text-2xl"
+          />
+        </div>
+        <h2 className="text-xl font-bold">{Post.title}</h2>
+        <p>{Post.content}</p>
+        {Post.imageUrl && (
+          <img
+            src={Post.imageUrl}
+            alt={Post.title}
+            className="w-32 h-32 object-cover mt-2 rounded"
+          />
+        )}
+      </li>
+    ))}
+  </ul>
+</div>
+
+      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <input
+            type="text"
+            placeholder="Title"
+            value={title}
+            onChange={(e) => settitle(e.target.value)}
+            className="w-full p-2 border rounded text-black"
+            required
+          />
+          <textarea
+            placeholder="Content"
+            value={content}
+            onChange={(e) => setcontent(e.target.value)}
+            className="w-full p-2 border rounded text-black"
+            required
+          />
+          {editingPostId && (
+            <input type="hidden" value={editingPostId} className="hidden" />
+          )}
+           <input
+                type="file"
+                accept="image/*"
+                onChange={handleImageUpload}
+                className="p-2 border rounded text-black"
+              />
+          <div className="flex justify-center">
+            <div className="flex flex-col items-center">
+              {imageUrl && (
+                <img
+                  src={imageUrl}
+                  alt="Preview"
+                  className="w-32 h-32 object-cover mt-2 rounded"
+                />
+              )}
+            </div>
+          </div>
+          <button
+            type="submit"
+            className="w-full bg-[#ff6200] text-white p-2 rounded"
+          >
+            {editingPostId ? "Update Post" : "Add Post"}
+          </button>
+        </form>
+      </Modal>
     </div>
   );
 }
