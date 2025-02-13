@@ -9,6 +9,7 @@ import Modal from "./modal";
 export default function AdminPage() {
   const [title, settitle] = useState("");
   const [content, setcontent] = useState("");
+  const [image, setImage] = useState(null);
   const [imageUrl, setImageUrl] = useState("");
   const [Posts, setPosts] = useState([]);
   const [editingPostId, setEditingPostId] = useState(null);
@@ -17,33 +18,34 @@ export default function AdminPage() {
 
   useEffect(() => {
     // Fetch posts from your API or data source
-    fetch("/api/posts")
+    fetch("/api/post")
       .then((res) => res.json())
       .then((data) => setPosts(data))
       .catch((error) => console.error("Error fetching posts:", error));
   }, []);
-
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const data = {
-      title: title,
-      content: content,
-      imageUrl: imageUrl,
-    };
-    
+    const formData = new FormData();
+    formData.append("title", title);
+    formData.append("content", content);
+    if (image) {
+      formData.append("image", image); // Append the image file
+    } else if (imageUrl){
+        formData.append("imageUrl", imageUrl)
+    }
 
     try {
       let response;
       if (editingPostId) {
-        response = await fetch(`/api/Posts/?postId=${editingPostId}`, {
+        response = await fetch(`/api/post/?postId=${editingPostId}`, {
           method: "PATCH",
-          body: JSON.stringify(data),
+          body: formData, // Use FormData for the body
         });
       } else {
-        response = await fetch("/api/Posts", {
+        response = await fetch("/api/post", {
           method: "POST",
-          body: JSON.stringify(data),
+          body: formData, // Use FormData for the body
         });
       }
 
@@ -55,17 +57,16 @@ export default function AdminPage() {
         );
         settitle("");
         setcontent("");
+        setImage(null); // Clear the image state
         setImageUrl("");
         setEditingPostId(null);
         setIsModalOpen(false);
-        // Fetch updated Posts
-        const updatedPosts = await fetch("/api/Posts").then((res) =>
+        const updatedPosts = await fetch("/api/post").then((res) =>
           res.json()
         );
         setPosts(updatedPosts);
       } else {
         const errorText = await response.text();
-        console.error("Error adding/updating Post:", errorText);
         toast.error("Error adding/updating Post: " + errorText);
       }
     } catch (error) {
@@ -75,7 +76,7 @@ export default function AdminPage() {
 
   const handleDeletePost = async (PostId) => {
     try {
-      const response = await fetch(`/api/posts/?PostId=${PostId}`, {
+      const response = await fetch(`/api/post/?postId=${PostId}`, {
         method: "DELETE",
       });
 
