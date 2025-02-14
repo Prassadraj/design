@@ -1,0 +1,65 @@
+/* globals.css or your CSS file */
+.contact-page {
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Center horizontally */
+    padding: 2rem;
+    min-height: calc(100vh - 6rem); /* Adjust 6rem to match your navbar height */
+    /* Add any other page-specific styles */
+}
+
+.contact-page h1 {
+    margin-bottom: 1rem;
+}
+
+.contact-page p {
+    margin-bottom: 2rem;
+    text-align: center; /* Center the paragraph text */
+    max-width: 600px; /* Limit paragraph width for readability */
+}
+
+.contact-form {
+    width: 90%;
+    max-width: 600px;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: bold;
+}
+
+.form-group input,
+.form-group textarea {
+    width: 100%;
+    padding: 0.8rem;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 1rem;
+}
+
+.submit-button {
+    background-color: #0070f3; /* Example color */
+    color: white;
+    padding: 1rem 1.5rem;
+    border: none;
+    border-radius: 5px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.submit-button:hover {
+    background-color: #0056b3; /* Darker shade on hover */
+}
+
+/* Responsive adjustments (optional) */
+@media (max-width: 400px) {
+    .contact-form {
+        width: 100%;
+    }
+}

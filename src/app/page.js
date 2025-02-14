@@ -1,20 +1,20 @@
 "use client";
+import "./globals.css";
+import { useState,useEffect } from 'react';
+import { FaTimes } from 'react-icons/fa';
 
-import { useEffect, useState } from "react";
-import { FaTimes } from "react-icons/fa";
-
-export default function Home() {
+const InteriorDesignPage = () => {
   const [posts, setPosts] = useState([]);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedImage, setSelectedImage] = useState(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
-  useEffect(() => {
-    // Fetch posts from your API or data source
-    fetch("/api/post")
-      .then((res) => res.json())
-      .then((data) => setPosts(data))
-      .catch((error) => console.error("Error fetching posts:", error));
-  }, []);
+   useEffect(() => {
+      // Fetch posts from your API or data source
+      fetch("/api/post")
+        .then((res) => res.json())
+        .then((data) => setPosts(data))
+        .catch((error) => console.error("Error fetching posts:", error));
+    }, []);
 
   const handleImageClick = (imageUrl) => {
     setSelectedImage(imageUrl);
@@ -27,28 +27,19 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen p-8">
-      <header className="mb-8 text-center">
-        <h1 className="text-4xl font-bold">Home Page</h1>
-      </header>
-      <main>
-        <ul className="flex flex-col gap-4">
-          {posts.map((post) => (
-            <li key={post._id} className="border p-4 rounded relative">
-              <h2 className="text-xl font-bold">{post.title}</h2>
-              <p>{post.content}</p>
-              {post.imageUrl && (
-                <img
-                  src={post.imageUrl}
-                  alt={post.title}
-                  className="w-32 h-32 object-cover cursor-pointer"
-                  onClick={() => handleImageClick(post.imageUrl)}
-                />
-              )}
-            </li>
-          ))}
-        </ul>
-      </main>
+    <div className="container">
+      <br></br>
+      <br></br>
+      <h1 className="title">Modern Interior Design</h1>
+      <div className="grid">
+        {posts.map((post) => (
+          <div key={post._id} className="card" onClick={() => handleImageClick(design.image)}>
+            <img src={post.imageUrl} alt={post.title} className="image" />
+            <h2 className="designTitle">{post.title}</h2>
+            <p className="description">{post.content}</p>
+          </div>
+        ))}
+      </div>
       {selectedImage && (
         <dialog
           open={isDialogOpen}
@@ -69,4 +60,6 @@ export default function Home() {
       )}
     </div>
   );
-}
+};
+
+export default InteriorDesignPage;

@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect,useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { FaTrash, FaEdit, FaPlus, FaArrowLeft } from "react-icons/fa";
@@ -8,17 +8,16 @@ import Modal from "./modal";
 import axios from "axios"; // Import axios
 
 export default function AdminPage() {
-  const [title, settitle] = useState("");
-  const [content, setcontent] = useState("");
+  const [title, setTitle] = useState("");
+  const [content, setContent] = useState("");
   const [image, setImage] = useState(null);
   const [imageUrl, setImageUrl] = useState("");
-  const [Posts, setPosts] = useState([]);
+  const [posts, setPosts] = useState([]);
   const [editingPostId, setEditingPostId] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [searchTerm, setSearchTerm] = useState(""); // Add search term state
+  const [searchTerm, setSearchTerm] = useState("");
   const [isFullScreen, setIsFullScreen] = useState(false);
   const imageRef = useRef(null);
-
 
   useEffect(() => {
     const fetchPosts = async () => {
@@ -57,14 +56,13 @@ export default function AdminPage() {
       }
 
       if (response.status === 200) {
-        // Check status code for success
         toast.success(
           editingPostId
             ? "Post updated successfully!"
             : "Post added successfully!"
         );
-        settitle("");
-        setcontent("");
+        setTitle("");
+        setContent("");
         setImage(null);
         setImageUrl("");
         setEditingPostId(null);
@@ -73,71 +71,73 @@ export default function AdminPage() {
         const updatedPosts = await axios.get("/api/post");
         setPosts(updatedPosts.data);
       } else {
-        const errorText = response.data; //axios automatically parses the error
-        console.error("Error adding/updating Post:", errorText);
-        toast.error("Error adding/updating Post: " + errorText);
+        const errorText = response.data;
+        console.error("Error adding/updating post:", errorText);
+        toast.error("Error adding/updating post: " + errorText);
       }
     } catch (error) {
-      console.error("Axios Error:", error); // Log the full Axios error
-      toast.error("Error: " + error.message); // Display a user-friendly message
+      console.error("Axios Error:", error);
+      toast.error("Error: " + error.message);
     }
   };
 
-  const handleDeletePost = async (PostId) => {
+  const handleDeletePost = async (postId) => {
     try {
-      const response = await axios.delete(`/api/post/?postId=${PostId}`);
+      const response = await axios.delete(`/api/post/?postId=${postId}`);
 
       if (response.status === 200) {
         toast.success("Post deleted successfully!");
-        setPosts(Posts.filter((Post) => Post._id !== PostId));
+        setPosts(posts.filter((post) => post._id !== postId));
       } else {
-        toast.error("Error deleting Post");
+        toast.error("Error deleting post");
       }
     } catch (error) {
       toast.error("Error: " + error.message);
     }
   };
 
-  const handleEditPost = (Post) => {
-    setEditingPostId(Post._id);
-    settitle(Post.title);
-    setcontent(Post.content);
-    setImageUrl(Post.imageUrl);
+  const handleEditPost = (post) => {
+    setEditingPostId(post._id);
+    setTitle(post.title);
+    setContent(post.content);
+    setImageUrl(post.imageUrl);
     setIsModalOpen(true);
   };
 
   const handleAddPost = () => {
     setEditingPostId(null);
-    settitle("");
-    setcontent("");
+    setTitle("");
+    setContent("");
     setImageUrl("");
     setIsModalOpen(true);
   };
+
   const handleBack = () => {
     window.history.back();
   };
 
-  const handleImageUpload = async (e) => {
+  const handleImageUpload = (e) => {
     const file = e.target.files[0];
     setImage(file);
 
-    // Convert to a preview URL for the image
     const imageUrl = URL.createObjectURL(file);
     setImageUrl(imageUrl);
   };
 
-  const filteredPosts = Posts.filter(
-    (Post) =>
-      Post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      Post.content.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredPosts = posts.filter(
+    (post) =>
+      post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      post.content.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
     <div className="min-h-screen p-8">
       <ToastContainer />
+      <br></br>
+      <br></br>
       <header className="mb-8 flex items-center justify-between">
         <div className="flex-1">
-          <h1 className="text-4xl font-semibold">Manage Posts</h1>
+          <h1 className="title">Manage Posts</h1>
         </div>
         <div className="flex">
           <button
@@ -155,65 +155,55 @@ export default function AdminPage() {
         </div>
       </header>
 
-      <div className="flex justify-center mb-8">
+      <div className="search-container mb-8">
         <input
           type="text"
           placeholder="Search Posts..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full p-2 border rounded text-black transform transition-transform duration-300 hover:scale-75 hover:z-10 focus:outline-none focus:border-blue-500"
+          className="search-input w-full p-2 border rounded text-black focus:outline-none focus:border-blue-500"
         />
       </div>
 
-      <div className="mt-10">
-        <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4">
-          {filteredPosts.map((Post) => (
-            <li
-              key={Post._id}
-              className="border border-orange-500 p-4 rounded relative transform transition-transform duration-300 ease-in-out hover:scale-105 hover:z-10 overflow-hidden"
-            >
-              <div className="flex items-center justify-center space-x-4 absolute top-0 right-2 bottom-0">
+      <div className="container">
+        <div className="grid">
+          {filteredPosts.map((post) => (
+            <div key={post._id} className="card">
+              <div className="card-actions">
                 <FaEdit
-                  onClick={() => handleEditPost(Post)}
-                  className="cursor-pointer text-blue-500 text-2xl"
+                  onClick={() => handleEditPost(post)}
+                  className="edit-icon cursor-pointer text-blue-500 text-2xl"
                 />
                 <FaTrash
-                  onClick={() => handleDeletePost(Post._id)}
-                  className="cursor-pointer text-blue-500 text-2xl"
+                  onClick={() => handleDeletePost(post._id)}
+                  className="delete-icon cursor-pointer text-blue-500 text-2xl"
                 />
               </div>
-              <h2 className="text-xl font-bold">{Post.title}</h2>
-              <p>{Post.content}</p>
-              {Post.imageUrl && (
-                <img
-                  src={Post.imageUrl}
-                  alt={Post.title}
-                  className="w-32 h-32 object-cover mt-2 rounded"
-                />
-              )}
-            </li>
+              <img src={post.imageUrl} alt={post.title} className="image" />
+              <h2 className="designTitle">{post.title}</h2>
+              <p className="description">{post.content}</p>
+            </div>
           ))}
-        </ul>
+        </div>
       </div>
 
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
         <form onSubmit={handleSubmit} className="space-y-4">
           <h1 className="text-3xl font-semibold text-center">
-            {" "}
             {editingPostId ? "Update Post" : "Add Post"}
           </h1>
           <input
             type="text"
             placeholder="Title"
             value={title}
-            onChange={(e) => settitle(e.target.value)}
+            onChange={(e) => setTitle(e.target.value)}
             className="w-full p-2 border rounded text-black"
             required
           />
           <textarea
             placeholder="Content"
             value={content}
-            onChange={(e) => setcontent(e.target.value)}
+            onChange={(e) => setContent(e.target.value)}
             className="w-full p-2 border rounded text-black"
             required
           />
@@ -221,32 +211,28 @@ export default function AdminPage() {
             <input type="hidden" value={editingPostId} className="hidden" />
           )}
           <div className="flex flex-col items-center justify-center">
-            {" "}
-            {/* Center content vertically and horizontally */}
             <input
               type="file"
               accept="image/*"
               onChange={handleImageUpload}
-              className="hidden" // Hide the default input
-              id="fileInput" // Add an ID to the input
+              className="hidden"
+              id="fileInput"
             />
             <label
               htmlFor="fileInput"
               className="cursor-pointer bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
             >
-              {" "}
-              {/* Style the label */}
               Choose File
             </label>
           </div>
           <div className="flex justify-center">
             <div className="flex flex-col items-center">
-            {imageUrl && (
-                  <img
-                    src={imageUrl}
-                    alt={title}
-                    className="w-32 h-32 object-cover mt-2 rounded cursor-pointer"
-                  />
+              {imageUrl && (
+                <img
+                  src={imageUrl}
+                  alt={title}
+                  className="w-32 h-32 object-cover mt-2 rounded cursor-pointer"
+                />
               )}
             </div>
           </div>

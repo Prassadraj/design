@@ -1,22 +1,60 @@
-input[type="text"]:hover,
-li:hover {
-  transform: scale(1.01); /* Zoom in a bit */
-  transition: transform 0.3s ease; /* Smooth transition effect */
-  z-index: 10; /* Ensure they appear above other elements */
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
 }
 
-li {
-  overflow: hidden; /* Prevents content from spilling out */
+.container {
+  margin: 0 auto;
+  padding: 10px;
+  max-width: 1000px; /* Ensure the container is wide enough */
+  overflow-x: hidden; /* Hide horizontal overflow */
 }
 
-.file-input-container {
+.grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr); /* Ensure four columns */
+  gap: 20px;
+}
+
+.card {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  position: relative;
+  padding-top: 2rem;
+}
+
+.card-actions {
+  position: absolute;
+  top: 0;
+  right: 0;
   display: flex;
-  flex-direction: column; /* Arrange items vertically */
-  align-items: center; /* Center horizontally */
-  justify-content: center; /* Center vertically */
+  flex-direction: row;
+  justify-content: space-between;
+  width: 100%;
+  padding: 0.5rem;
+  background: rgba(255, 255, 255, 0.9);
 }
 
-.file-name {
-  text-align: center; /* Center the text */
-  margin-top: 10px; /* Add some space above the file name */
+.edit-icon,
+.delete-icon {
+  margin: 0.5rem;
+}
+
+.image {
+  width: 100%;
+  height: auto;
+}
+
+.designTitle {
+  font-size: 1.5rem;
+  margin: 10px 0;
+  text-align: center;
+}
+
+.description {
+  padding: 0 10px 20px;
+  text-align: center;
 }

@@ -5,19 +5,164 @@
 @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
 
 :root {
-  --background: #f09d51; /* A warm, modern orange color */
-  --foreground: #282828; /* A dark grey for good contrast */
+  --background: #f09d51;
+  --foreground: #282828; 
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #f1f1f1; /* A bolder orange for dark mode */
-    --foreground: #ff6200; /* A lighter grey for readability */
+    /* --background: #f1f1f1;  */
+    --foreground: rgba(255, 255, 255, 0.8); 
   }
+}
+
+/* globals.css or your CSS file */
+.background-container {
+  /* Option 1: Using a background image */
+  /* background-image: url(/public/Orange-Background.jpg);  */
+  background-size: cover; /* Or contain, auto, etc. */
+  background-repeat: no-repeat;
+  /* Ensure the background covers the entire viewport */
+  min-height: 100vh; /* Minimum 100% of viewport height */
+  width: 100vw; /* Minimum 100% of viewport width */
+  position: relative; /* Needed if you want to position elements on top of it */
+}
+
+/* Optional: Add a subtle overlay if needed */
+.background-container::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  /* background-color: rgba(0, 0, 0, 0.2);  Example: Slightly darken the background */
+}
+
+/* Ensure content is above the background */
+.background-container > * { /* All direct children of the container */
+  position: relative; /* To stack above the background and optional overlay */
+  z-index: 1; /* Ensure content is on top */
 }
 
 body {
   color: var(--foreground);
   background: var(--background);
   font-family: 'Roboto', Arial, Helvetica, sans-serif; /* Updated font */
+}
+
+/* globals.css */
+/* Styles for the home page title and its background */
+.home-page-container {
+  display: flex; /* Use flexbox for centering */
+  justify-content: center; /* Center horizontally */
+  align-items: center; /* Center vertically */
+  padding: 20px; /* Add some padding around the title */
+  margin: 20px; /* Add some margin around the title */
+}
+
+.home-page-title {
+  background-color: rgba(255, 255, 255, 0.8); /* White background with some transparency */
+  color: #333; /* Dark text color (adjust as needed) */
+  padding: 20px 40px; /* Adjust padding as needed */
+  border-radius: 10px; /* Rounded corners */
+  box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.2); /* Optional: Add a subtle shadow */
+  text-align: center; /* Center the text within the h1 */
+}
+
+
+/* Optional: Responsive adjustments */
+@media (max-width: 768px) {
+  .home-page-title {
+    font-size: 3xl; /* Adjust font size on smaller screens */
+    padding: 15px 30px; /* Adjust padding */
+  }
+}
+
+.navbar {
+  background-color: rgba(255, 255, 255, 0.8); /* Semi-transparent white background */
+  padding: 1rem; /* Adjust padding as needed */
+  position: fixed; /* Fixed to the top */
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 2; /* Ensure it's above the background and other content */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Optional: Add a subtle shadow */
+}
+
+.navbar-links {
+  list-style: none; /* Remove bullet points */
+  margin: 0;
+  padding: 0;
+  display: flex; /* Arrange links horizontally */
+  justify-content: center; /* Center the links */
+}
+
+.navbar-item {
+  margin: 0 1rem; /* Add spacing between links */
+}
+
+.navbar-link {
+  text-decoration: none; /* Remove underlines */
+  color: #333; /* Dark text color */
+  font-weight: bold;
+  padding: 0.5rem 1rem; /* Add padding to the links */
+  border-radius: 5px; /* Optional: Rounded corners */
+  transition: background-color 0.3s ease; /* Add a smooth transition */
+}
+
+.navbar-link span.active { /* Active style applies to the span inside the Link */
+  background-color: rgba(0, 0, 0, 0.2); 
+  font-weight: bold; /* Same font weight */
+  padding: 0.5rem 1rem; /* Same padding */
+  border-radius: 5px; /* Same rounded corners */
+  transition: background-color 0.3s ease; /* Same transition */
+}
+.navbar-link:hover{
+  /* background-color: rgba(0, 0, 0, 0.2);  */
+  font-weight: bold; /* Same font weight */
+  padding: 0.5rem 1rem; /* Same padding */
+  border-radius: 5px; /* Same rounded corners */
+  transition: background-color 0.3s ease; /* Same transition */
+} /* Hover style applies to all links */
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.title {
+  text-align: center;
+  font-size: 2.5rem;
+  margin-bottom: 20px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+.card {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.image {
+  width: 100%;
+  height: auto;
+}
+
+.designTitle {
+  font-size: 1.5rem;
+  margin: 10px 0;
+  text-align: center;
+}
+
+.description {
+  padding: 0 10px 20px;
+  text-align: center;
 }
