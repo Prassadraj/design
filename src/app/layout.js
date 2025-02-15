@@ -25,7 +25,7 @@ export default function RootLayout({ children }) {
       >
         <div className="background-container">
           {" "}
-          <Navbar />
+          {/* <Navbar /> */}
           {/* Container for background */}
           {children}
         </div>
